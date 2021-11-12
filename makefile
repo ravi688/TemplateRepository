@@ -15,15 +15,16 @@ PROJECT_NAME = TemplateRepository
 STATIC_LIB_NAME = temprepo.a
 DYNAMIC_LIB_NAME = #temprepo.dll
 EXECUTABLE_NAME = main.exe
-DEPENDENCIES_DIR = .\dependencies
-DEPENDENCIES = Example1 Example2
-DEPENDENCY_LIBS = #./dependencies/BufferLib/lib/bufferlib.a
+DEPENDENCIES = #BufferLib HPML TemplateSystem BufferLib/dependencies/CallTrace
+DEPENDENCY_LIBS = #BufferLib/lib/bufferlib.a BufferLib/dependencies/CallTrace/lib/calltrace.a HPML/lib/hpml.a
+DEPENDENCIES_DIR = ./dependencies
 #-------------------------------------------
 
 #-------------------------------------------
 #		Project Initialization and Uitilty commands
 #-------------------------------------------
 __DEPENDENCIES = $(addprefix $(DEPENDENCIES_DIR)/, $(DEPENDENCIES))
+__DEPENDENCY_LIBS = $(addprefix $(DEPENDENCIES_DIR)/, $(DEPENDENCY_LIBS))
 __EXECUTABLE_NAME = $(addsuffix .exe, $(basename $(EXECUTABLE_NAME)))
 .PHONY: all
 .PHONY: init
@@ -34,7 +35,7 @@ all: dgraph release
 	@echo [Log] $@ created successfully!
 
 $(DEPENDENCIES_DIR): 
-	mkdir $@
+	mkdir $(subst /,\,$@)
 	@echo [Log] $@ created successfully!
 
 init: $(PROJECT_NAME).gv $(DEPENDENCIES_DIR) 
@@ -48,7 +49,7 @@ init: $(PROJECT_NAME).gv $(DEPENDENCIES_DIR)
 DGRAPH_TARGET = ./dependency_graph/$(PROJECT_NAME).png
 DGRAPH_TARGET_DIR = dependency_graph
 DGRAPH_SCRIPT = $(PROJECT_NAME).gv
-DGRAPH_INCLUDES = -I./ $(addprefix -I, $(__DEPENDENCIES))
+DGRAPH_INCLUDES = -I./$(addprefix -I, $(__DEPENDENCIES))
 DGRAPH_COMPILER = dot
 DGRAPH_FLAGS = -Tpng
 
@@ -118,7 +119,6 @@ ARCHIVER = ar
 .PHONY: $(TARGET)	
 .PHONY: bin-clean
 .PHONY: PRINT_MESSAGE1
-.PHONY: PRINT_MESSAGE2
 
 all: release
 lib-static: lib-static-release
@@ -156,11 +156,11 @@ $(TARGET_STATIC_LIB) : PRINT_MESSAGE1 $(filter-out source/main.o, $(OBJECTS)) | 
 	$(ARCHIVER) $(ARCHIVER_FLAGS) $@ $(filter-out $<, $^)
 	@echo [Log] $@ built successfully!
 
-$(TARGET): $(DEPENDENCY_LIBS) $(TARGET_STATIC_LIB) source/main.o
+$(TARGET): $(__DEPENDENCY_LIBS) $(TARGET_STATIC_LIB) source/main.o
 	@echo [Log] Linking $@ ...
 	$(COMPILER) $(COMPILER_FLAGS) source/main.o $(LIBS) \
-	$(addprefix -L, $(dir $(TARGET_STATIC_LIB) $(DEPENDENCY_LIBS))) \
-	$(addprefix -l:, $(notdir $(TARGET_STATIC_LIB) $(DEPENDENCY_LIBS))) \
+	$(addprefix -L, $(dir $(TARGET_STATIC_LIB) $(__DEPENDENCY_LIBS))) \
+	$(addprefix -l:, $(notdir $(TARGET_STATIC_LIB) $(__DEPENDENCY_LIBS))) \
 	-o $@
 	@echo [Log] $(PROJECT_NAME) built successfully!
 
@@ -170,6 +170,8 @@ bin-clean:
 	del $(subst /,\, $(TARGET_STATIC_LIB))
 	rmdir $(subst /,\, $(TARGET_STATIC_LIB_DIR))
 	@echo [Log] Binaries cleaned successfully!
+# 	$(MAKE) --directory=./dependencies/BufferLib clean
+# 	$(MAKE) --directory=./dependencies/HPML clean
 # 	$(MAKE) --directory=../../shared-dependencies/BufferLib clean
 #  	$(MAKE) --directory=./dependencies/tgc clean
 #-------------------------------------------
