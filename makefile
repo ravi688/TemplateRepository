@@ -1,10 +1,98 @@
-TARGET_STATIC_LIB = ./lib/example.a
+#-------------------------------------------
+#		Requirements
+#-------------------------------------------
+#	1. mcpp: http://mcpp.sourceforge.net/
+#	2. dot or graphviz: https://graphviz.org/
+#	3. uncrustify: https://github.com/uncrustify/uncrustify
+#	4. ar
+#	5. gcc
+#-------------------------------------------
+
+#-------------------------------------------
+#		Project Configuration
+#-------------------------------------------
+PROJECT_NAME = TemplateRepository
+STATIC_LIB_NAME = temprepo.a
+DYNAMIC_LIB_NAME = #temprepo.dll
+EXECUTABLE_NAME = main.exe
+DEPENDENCIES_DIR = .\dependencies
+DEPENDENCIES = Example1 Example2
+DEPENDENCY_LIBS = #./dependencies/BufferLib/lib/bufferlib.a
+#-------------------------------------------
+
+#-------------------------------------------
+#		Project Initialization and Uitilty commands
+#-------------------------------------------
+__DEPENDENCIES = $(addprefix $(DEPENDENCIES_DIR)/, $(DEPENDENCIES))
+__EXECUTABLE_NAME = $(addsuffix .exe, $(basename $(EXECUTABLE_NAME)))
+.PHONY: all
+.PHONY: init
+all: dgraph release
+
+%.gv:
+	echo digraph $(PROJECT_NAME) { $(PROJECT_NAME); } > $@
+	@echo [Log] $@ created successfully!
+
+$(DEPENDENCIES_DIR): 
+	mkdir $@
+	@echo [Log] $@ created successfully!
+
+init: $(PROJECT_NAME).gv $(DEPENDENCIES_DIR) 
+	@echo [Log] $(PROJECT_NAME) init successfully!
+#-------------------------------------------
+
+
+#-------------------------------------------
+#		Dependency Graph Generation
+#-------------------------------------------
+DGRAPH_TARGET = ./dependency_graph/$(PROJECT_NAME).png
+DGRAPH_TARGET_DIR = dependency_graph
+DGRAPH_SCRIPT = $(PROJECT_NAME).gv
+DGRAPH_INCLUDES = -I./ $(addprefix -I, $(__DEPENDENCIES))
+DGRAPH_COMPILER = dot
+DGRAPH_FLAGS = -Tpng
+
+DGRAPH_PREPROCESSOR = mcpp
+DGRAPH_PREPROCESSOR_FLAGS = -P
+
+
+DGRAPH_PREPROCESSED_SCRIPT = $(addsuffix .i, $(DGRAPH_SCRIPT))
+
+.PHONY: dgraph
+.PHONY: dgraph-clean
+
+%.gv.i:
+	$(DGRAPH_PREPROCESSOR) $(DGRAPH_PREPROCESSOR_FLAGS) $(DGRAPH_INCLUDES) $(basename $@) -o $@
+
+$(DGRAPH_TARGET_DIR):
+	mkdir $@
+
+dgraph: $(DGRAPH_PREPROCESSED_SCRIPT) | $(DGRAPH_TARGET_DIR)
+	$(DGRAPH_COMPILER) $(DGRAPH_FLAGS) $(DGRAPH_PREPROCESSED_SCRIPT) > $(DGRAPH_TARGET)
+
+dgraph-clean: 
+	del dependency_graph\$(PROJECT_NAME).png
+	rmdir dependency_graph
+	del $(PROJECT_NAME).gv.i
+	@echo [Log] Dependency graphs cleaned successfully!
+#-------------------------------------------
+
+#-------------------------------------------
+#
+#-------------------------------------------
+
+
+
+#-------------------------------------------
+#		Binary Generation
+#-------------------------------------------
+TARGET_STATIC_LIB = $(join ./lib/, $(STATIC_LIB_NAME))
 TARGET_STATIC_LIB_DIR = ./lib
-TARGET = main
+TARGET = $(__EXECUTABLE_NAME)
 
 #Dependencies
-DEPENDENCY_LIBS = 
-DEPENDENCY_INCLUDES =
+DEPENDENCY_INCLUDES = $(addsuffix /include, $(__DEPENDENCIES))
+
 
 INCLUDES= -I.\include $(addprefix -I, $(DEPENDENCY_INCLUDES))
 SOURCES= $(wildcard source/*.c)
@@ -28,7 +116,9 @@ ARCHIVER = ar
 .PHONY: release
 .PHONY: debug
 .PHONY: $(TARGET)	
-.PHONY: clean
+.PHONY: bin-clean
+.PHONY: PRINT_MESSAGE1
+.PHONY: PRINT_MESSAGE2
 
 all: release
 lib-static: lib-static-release
@@ -51,7 +141,7 @@ debug: $(TARGET)
 %.o : %.c
 	$(COMPILER) $(COMPILER_FLAGS) $(DEFINES) $(INCLUDES) -c $< -o $@
 
-./dependencies/%.a ../../shared-dependencies/%.a:
+%.a:
 	@echo [Log] Building $@ ...
 	$(MAKE) --directory=$(subst lib/, ,$(dir $@)) $(__STATIC_LIB_COMMAND)
 	@echo [Log] $@ built successfully!
@@ -59,24 +149,36 @@ debug: $(TARGET)
 $(TARGET_STATIC_LIB_DIR): 
 	mkdir $@
 
-PRINT_MESSAGE: 
+PRINT_MESSAGE1: 
 	@echo [Log] Building $(TARGET_STATIC_LIB) ...
 
-$(TARGET_STATIC_LIB) : PRINT_MESSAGE $(filter-out source/main.o, $(OBJECTS)) | $(TARGET_STATIC_LIB_DIR) 
+$(TARGET_STATIC_LIB) : PRINT_MESSAGE1 $(filter-out source/main.o, $(OBJECTS)) | $(TARGET_STATIC_LIB_DIR) 
 	$(ARCHIVER) $(ARCHIVER_FLAGS) $@ $(filter-out $<, $^)
 	@echo [Log] $@ built successfully!
 
-
 $(TARGET): $(DEPENDENCY_LIBS) $(TARGET_STATIC_LIB) source/main.o
+	@echo [Log] Linking $@ ...
 	$(COMPILER) $(COMPILER_FLAGS) source/main.o $(LIBS) \
 	$(addprefix -L, $(dir $(TARGET_STATIC_LIB) $(DEPENDENCY_LIBS))) \
 	$(addprefix -l:, $(notdir $(TARGET_STATIC_LIB) $(DEPENDENCY_LIBS))) \
 	-o $@
+	@echo [Log] $(PROJECT_NAME) built successfully!
 
-clean: 
+bin-clean: 
 	del $(addprefix source\, $(notdir $(OBJECTS)))
-	del main.exe
+	del $(__EXECUTABLE_NAME)
 	del $(subst /,\, $(TARGET_STATIC_LIB))
 	rmdir $(subst /,\, $(TARGET_STATIC_LIB_DIR))
+	@echo [Log] Binaries cleaned successfully!
 # 	$(MAKE) --directory=../../shared-dependencies/BufferLib clean
 #  	$(MAKE) --directory=./dependencies/tgc clean
+#-------------------------------------------
+
+
+#-------------------------------------------
+#		Cleaning
+#-------------------------------------------
+.PHONY: clean
+clean: bin-clean dgraph-clean
+	@echo [Log] All cleaned successfully!
+#-------------------------------------------
