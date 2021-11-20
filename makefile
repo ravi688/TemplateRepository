@@ -15,8 +15,8 @@ PROJECT_NAME = TemplateRepository
 STATIC_LIB_NAME = temprepo.a
 DYNAMIC_LIB_NAME = #temprepo.dll
 EXECUTABLE_NAME = main.exe
-DEPENDENCIES = #BufferLib TemplateSystem
-DEPENDENCY_LIBS = #BufferLib/lib/bufferlib.a
+DEPENDENCIES = #BufferLib BufferLib/dependencies/CallTrace
+DEPENDENCY_LIBS = #BufferLib/lib/bufferlib.a BufferLib/dependencies/CallTrace/lib/calltrace.a
 DEPENDENCIES_DIR = ./dependencies
 SHARED_DEPENDENCIES = #CallTrace
 SHARED_DEPENDENCY_LIBS = #CallTrace/lib/calltrace.a
@@ -55,7 +55,7 @@ init: $(PROJECT_NAME).gv $(DEPENDENCIES_DIR) $(SHARED_DEPENDENCIES_DIR)
 DGRAPH_TARGET = ./dependency_graph/$(PROJECT_NAME).png
 DGRAPH_TARGET_DIR = dependency_graph
 DGRAPH_SCRIPT = $(PROJECT_NAME).gv
-DGRAPH_INCLUDES = -I./$(addprefix -I, $(__DEPENDENCIES) $(__SHARED_DEPENDENCIES))
+DGRAPH_INCLUDES = $(addprefix -I, $(__DEPENDENCIES) $(__SHARED_DEPENDENCIES))
 DGRAPH_COMPILER = dot
 DGRAPH_FLAGS = -Tpng
 
@@ -177,7 +177,7 @@ bin-clean:
 	rmdir $(subst /,\, $(TARGET_STATIC_LIB_DIR))
 	@echo [Log] Binaries cleaned successfully!
 # 	$(MAKE) --directory=./dependencies/BufferLib clean
-# 	$(MAKE) --directory=./shared-dependencies/CallTrace clean
+# 	$(MAKE) --directory=./dependencies/BufferLib/dependencies/CallTrace clean
 # 	$(MAKE) --directory=./dependencies/HPML clean
 # 	$(MAKE) --directory=../../shared-dependencies/BufferLib clean
 #  	$(MAKE) --directory=./dependencies/tgc clean
@@ -188,6 +188,6 @@ bin-clean:
 #		Cleaning
 #-------------------------------------------
 .PHONY: clean
-clean: bin-clean dgraph-clean
+clean: bin-clean
 	@echo [Log] All cleaned successfully!
 #-------------------------------------------
