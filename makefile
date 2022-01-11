@@ -11,16 +11,19 @@
 #-------------------------------------------
 #		Project Configuration
 #-------------------------------------------
-PROJECT_NAME = TemplateRepository
-STATIC_LIB_NAME = temprepo.a
-DYNAMIC_LIB_NAME = #temprepo.dll
+PROJECT_NAME = TemplateProject
+STATIC_LIB_NAME = template_project.a
+DYNAMIC_LIB_NAME = #template_project.dll
 EXECUTABLE_NAME = main.exe
-DEPENDENCIES = #BufferLib BufferLib/dependencies/CallTrace
-DEPENDENCY_LIBS = #BufferLib/lib/bufferlib.a BufferLib/dependencies/CallTrace/lib/calltrace.a
+EXTERNAL_LIBRARIES = #-L.\external-dependency-libs -lshaderc_shared
+EXTERNAL_INCLUDES = 
+DEPENDENCIES = #../../dependencies/MeshLib/dependencies/DiskManager ../../shared-dependencies/BufferLib ../../dependencies/SafeMemory/shared-dependencies/CallTrace
+DEPENDENCY_LIBS = #../../dependencies/MeshLib/dependencies/DiskManager/lib/diskmanager.a ../../shared-dependencies/BufferLib/lib/bufferlib.a ../../dependencies/SafeMemory/shared-dependencies/CallTrace/lib/calltrace.a
 DEPENDENCIES_DIR = ./dependencies
 SHARED_DEPENDENCIES = #CallTrace
 SHARED_DEPENDENCY_LIBS = #CallTrace/lib/calltrace.a
 SHARED_DEPENDENCIES_DIR = ./shared-dependencies
+DIRECTORIES = ./source/ ./include/
 #-------------------------------------------
 
 #-------------------------------------------
@@ -31,6 +34,7 @@ __DEPENDENCY_LIBS = $(addprefix $(DEPENDENCIES_DIR)/, $(DEPENDENCY_LIBS))
 __SHARED_DEPENDENCIES = $(addprefix $(SHARED_DEPENDENCIES_DIR)/, $(SHARED_DEPENDENCIES))
 __SHARED_DEPENDENCY_LIBS = $(addprefix $(SHARED_DEPENDENCIES_DIR)/, $(SHARED_DEPENDENCY_LIBS))
 __EXECUTABLE_NAME = $(addsuffix .exe, $(basename $(EXECUTABLE_NAME)))
+
 .PHONY: all
 .PHONY: init
 all: dgraph release
@@ -39,12 +43,11 @@ all: dgraph release
 	echo digraph $(PROJECT_NAME) { $(PROJECT_NAME); } > $@
 	@echo [Log] $@ created successfully!
 
-$(DEPENDENCIES_DIR) $(SHARED_DEPENDENCIES_DIR): 
+$(DIRECTORIES) $(DEPENDENCIES_DIR) $(SHARED_DEPENDENCIES_DIR): 
 	mkdir $(subst /,\,$@)
 	@echo [Log] $@ created successfully!
 
-
-init: $(PROJECT_NAME).gv $(DEPENDENCIES_DIR) $(SHARED_DEPENDENCIES_DIR)
+init: $(PROJECT_NAME).gv $(DIRECTORIES) $(DEPENDENCIES_DIR) $(SHARED_DEPENDENCIES_DIR)
 	@echo [Log] $(PROJECT_NAME) init successfully!
 #-------------------------------------------
 
@@ -104,7 +107,7 @@ SHARED_DEPENDENCY_INCLUDES = $(addsuffix /include, $(__SHARED_DEPENDENCIES))
 INCLUDES= -I.\include $(addprefix -I, $(DEPENDENCY_INCLUDES) $(SHARED_DEPENDENCY_INCLUDES))
 SOURCES= $(wildcard source/*.c)
 OBJECTS= $(addsuffix .o, $(basename $(SOURCES)))
-LIBS = 
+LIBS = $(EXTERNAL_LIBRARIES)
 
 #Flags and Defines
 DEBUG_DEFINES =  -DGLOBAL_DEBUG -DDEBUG -DLOG_DEBUG
@@ -164,10 +167,10 @@ $(TARGET_STATIC_LIB) : PRINT_MESSAGE1 $(filter-out source/main.o, $(OBJECTS)) | 
 
 $(TARGET): $(__DEPENDENCY_LIBS) $(__SHARED_DEPENDENCY_LIBS) $(TARGET_STATIC_LIB) source/main.o
 	@echo [Log] Linking $@ ...
-	$(COMPILER) $(COMPILER_FLAGS) source/main.o $(LIBS) \
+	$(COMPILER) $(COMPILER_FLAGS) source/main.o \
 	$(addprefix -L, $(dir $(TARGET_STATIC_LIB) $(__DEPENDENCY_LIBS) $(__SHARED_DEPENDENCY_LIBS))) \
 	$(addprefix -l:, $(notdir $(TARGET_STATIC_LIB) $(__DEPENDENCY_LIBS) $(__SHARED_DEPENDENCY_LIBS))) \
-	-o $@
+	$(LIBS) -o $@
 	@echo [Log] $(PROJECT_NAME) built successfully!
 
 bin-clean: 
@@ -176,6 +179,9 @@ bin-clean:
 	del $(subst /,\, $(TARGET_STATIC_LIB))
 	rmdir $(subst /,\, $(TARGET_STATIC_LIB_DIR))
 	@echo [Log] Binaries cleaned successfully!
+# 	$(MAKE) --directory=./dependencies/../../dependencies/MeshLib/dependencies/DiskManager clean
+# 	$(MAKE) --directory=./dependencies/../../shared-dependencies/BufferLib clean
+# 	$(MAKE) --directory=./dependencies/../../dependencies/SafeMemory/shared-dependencies/CallTrace clean
 # 	$(MAKE) --directory=./dependencies/BufferLib clean
 # 	$(MAKE) --directory=./dependencies/BufferLib/dependencies/CallTrace clean
 # 	$(MAKE) --directory=./dependencies/HPML clean
