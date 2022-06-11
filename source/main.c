@@ -1,9 +1,10 @@
 
-#include <stdio.h>
-#include <example.h>
+#include <template_repo/debug.h>
+#include <template_repo/assert.h>
 
 int main(int argc, char** argv)
 {
-	function();
+	debug_log_info("Template Repository!");
+
 	return 0;
 }
