@@ -15,6 +15,8 @@ PROJECT_NAME = TemplateRepo
 STATIC_LIB_NAME = templaterepo.a
 DYNAMIC_LIB_NAME = templaterepo.dll
 EXECUTABLE_NAME = main.exe
+EXTERNAL_INCLUDES = 
+EXTERNAL_LIBS = 
 DEPENDENCIES = #CallTrace
 DEPENDENCY_LIBS = #CallTrace/lib/calltrace.a
 DEPENDENCIES_DIR = ./dependencies
@@ -105,7 +107,7 @@ SHARED_DEPENDENCY_INCLUDES = $(addsuffix /include, $(__SHARED_DEPENDENCIES))
 INCLUDES= -I.\include $(EXTERNAL_INCLUDES) $(addprefix -I, $(DEPENDENCY_INCLUDES) $(SHARED_DEPENDENCY_INCLUDES))
 SOURCES= $(wildcard source/*.c)
 OBJECTS= $(addsuffix .o, $(basename $(SOURCES)))
-LIBS = 
+LIBS = $(EXTERNAL_LIBS)
 
 #Flags and Defines
 DEBUG_DEFINES =  -DGLOBAL_DEBUG -DDEBUG -DLOG_DEBUG
