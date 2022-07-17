@@ -220,7 +220,7 @@ $(TARGET): $(__DEPENDENCY_LIBS) $(__SHARED_DEPENDENCY_LIBS) $(TARGET_STATIC_LIB)
 	@echo [Log] $(PROJECT_NAME) built successfully!
 
 RM := rm -f
-RM_DIR := rmdir
+RM_DIR := rm -rf
 
 bin-clean: 
 	$(RM) $(addprefix source/, $(notdir $(OBJECTS)))
