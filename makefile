@@ -14,9 +14,10 @@
 PROJECT_NAME = TemplateRepo
 STATIC_LIB_NAME = templaterepo.a
 DYNAMIC_LIB_NAME = templaterepo.dll
-EXECUTABLE_NAME = main.exe
+EXECUTABLE_NAME = main
 EXTERNAL_INCLUDES = 
 EXTERNAL_LIBS = 
+
 DEPENDENCIES = #CallTrace
 DEPENDENCY_LIBS = #CallTrace/lib/calltrace.a
 DEPENDENCIES_DIR = ./dependencies
@@ -32,7 +33,11 @@ __DEPENDENCIES = $(addprefix $(DEPENDENCIES_DIR)/, $(DEPENDENCIES))
 __DEPENDENCY_LIBS = $(addprefix $(DEPENDENCIES_DIR)/, $(DEPENDENCY_LIBS))
 __SHARED_DEPENDENCIES = $(addprefix $(SHARED_DEPENDENCIES_DIR)/, $(SHARED_DEPENDENCIES))
 __SHARED_DEPENDENCY_LIBS = $(addprefix $(SHARED_DEPENDENCIES_DIR)/, $(SHARED_DEPENDENCY_LIBS))
+ifdef COMSPEC
 __EXECUTABLE_NAME = $(addsuffix .exe, $(basename $(EXECUTABLE_NAME)))
+else
+__EXECUTABLE_NAME = $(basename $(EXECUTABLE_NAME))
+endif
 .PHONY: all
 .PHONY: init
 all: dgraph release
@@ -104,7 +109,7 @@ TARGET = $(__EXECUTABLE_NAME)
 DEPENDENCY_INCLUDES = $(addsuffix /include, $(__DEPENDENCIES))
 SHARED_DEPENDENCY_INCLUDES = $(addsuffix /include, $(__SHARED_DEPENDENCIES))
 
-INCLUDES= -I.\include $(EXTERNAL_INCLUDES) $(addprefix -I, $(DEPENDENCY_INCLUDES) $(SHARED_DEPENDENCY_INCLUDES))
+INCLUDES= -I./include $(EXTERNAL_INCLUDES) $(addprefix -I, $(DEPENDENCY_INCLUDES) $(SHARED_DEPENDENCY_INCLUDES))
 SOURCES= $(wildcard source/*.c)
 OBJECTS= $(addsuffix .o, $(basename $(SOURCES)))
 LIBS = $(EXTERNAL_LIBS)
@@ -214,13 +219,16 @@ $(TARGET): $(__DEPENDENCY_LIBS) $(__SHARED_DEPENDENCY_LIBS) $(TARGET_STATIC_LIB)
 	-o $@
 	@echo [Log] $(PROJECT_NAME) built successfully!
 
+RM := rm -f
+RM_DIR := rmdir
+
 bin-clean: 
-	del $(addprefix source\, $(notdir $(OBJECTS)))
-	del $(__EXECUTABLE_NAME)
-	del $(subst /,\, $(TARGET_STATIC_LIB))
-	del $(subst /,\, $(TARGET_DYNAMIC_LIB))
-	del $(subst /,\, $(TARGET_DYNAMIC_IMPORT_LIB))
-	rmdir $(subst /,\, $(TARGET_LIB_DIR))
+	$(RM) $(addprefix source/, $(notdir $(OBJECTS)))
+	$(RM) $(__EXECUTABLE_NAME)
+	$(RM) $(subst /,\, $(TARGET_STATIC_LIB))
+	$(RM) $(subst /,\, $(TARGET_DYNAMIC_LIB))
+	$(RM) $(subst /,\, $(TARGET_DYNAMIC_IMPORT_LIB))
+	$(RM_DIR) $(subst /,\, $(TARGET_LIB_DIR))
 	@echo [Log] Binaries cleaned successfully!
 # 	$(MAKE) --directory=./dependencies/CallTrace clean
 # 	$(MAKE) --directory=./shared-dependencies/CallTrace clean
