@@ -225,10 +225,10 @@ RM_DIR := rmdir
 bin-clean: 
 	$(RM) $(addprefix source/, $(notdir $(OBJECTS)))
 	$(RM) $(__EXECUTABLE_NAME)
-	$(RM) $(subst /,\, $(TARGET_STATIC_LIB))
-	$(RM) $(subst /,\, $(TARGET_DYNAMIC_LIB))
-	$(RM) $(subst /,\, $(TARGET_DYNAMIC_IMPORT_LIB))
-	$(RM_DIR) $(subst /,\, $(TARGET_LIB_DIR))
+	$(RM) $(TARGET_STATIC_LIB)
+	$(RM) $(TARGET_DYNAMIC_LIB)
+	$(RM) $(TARGET_DYNAMIC_IMPORT_LIB)
+	$(RM_DIR) $(TARGET_LIB_DIR)
 	@echo [Log] Binaries cleaned successfully!
 # 	$(MAKE) --directory=./dependencies/CallTrace clean
 # 	$(MAKE) --directory=./shared-dependencies/CallTrace clean
