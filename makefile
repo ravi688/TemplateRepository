@@ -110,7 +110,7 @@ DEPENDENCY_INCLUDES = $(addsuffix /include, $(__DEPENDENCIES))
 SHARED_DEPENDENCY_INCLUDES = $(addsuffix /include, $(__SHARED_DEPENDENCIES))
 
 INCLUDES= -I./include $(EXTERNAL_INCLUDES) $(addprefix -I, $(DEPENDENCY_INCLUDES) $(SHARED_DEPENDENCY_INCLUDES))
-SOURCES= $(wildcard source/*.c)
+SOURCES= $(wildcard source/*.c source/*/*.c)
 OBJECTS= $(addsuffix .o, $(basename $(SOURCES)))
 LIBS = $(EXTERNAL_LIBS)
 
@@ -223,7 +223,7 @@ RM := rm -f
 RM_DIR := rm -rf
 
 bin-clean: 
-	$(RM) $(addprefix source/, $(notdir $(OBJECTS)))
+	$(RM) $(OBJECTS)
 	$(RM) $(__EXECUTABLE_NAME)
 	$(RM) $(TARGET_STATIC_LIB)
 	$(RM) $(TARGET_DYNAMIC_LIB)
