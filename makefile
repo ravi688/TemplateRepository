@@ -16,6 +16,7 @@ STATIC_LIB_NAME = templaterepo.a
 DYNAMIC_LIB_NAME = templaterepo.dll
 EXECUTABLE_NAME = main
 MAIN_SOURCE_LANG = c
+MAIN_SOURCES=main.cpp
 EXTERNAL_INCLUDES =
 EXTERNAL_LIBS =
 BUILD_DEFINES=
@@ -111,16 +112,7 @@ TARGET = $(__EXECUTABLE_NAME)
 DEPENDENCY_INCLUDES = $(addsuffix /include, $(__DEPENDENCIES))
 SHARED_DEPENDENCY_INCLUDES = $(addsuffix /include, $(__SHARED_DEPENDENCIES))
 
-ifeq ($(MAIN_SOURCE_LANG),cpp)
-	MAIN_SOURCE=source/main.cpp
-endif
-
-ifeq ($(MAIN_SOURCE_LANG),c)
-	MAIN_SOURCE=source/main.c
-endif
-
-MAIN_SOURCE=source/main.c
-MAIN_OBJECT=$(addsuffix .o, $(MAIN_SOURCE))
+MAIN_OBJECT=$(addsuffix .o, $(wildcard $(MAIN_SOURCES)))
 INCLUDES= -I./include $(EXTERNAL_INCLUDES) $(addprefix -I, $(DEPENDENCY_INCLUDES) $(SHARED_DEPENDENCY_INCLUDES))
 C_SOURCES=$(wildcard source/*.c source/*/*.c)
 CPP_SOURCES=$(wildcard source/*.cpp source/*/*.cpp)
@@ -293,6 +285,7 @@ RM_DIR := rm -rf
 
 bin-clean:
 	$(RM) $(OBJECTS)
+	$(RM) $(MAIN_OBJECT)
 	$(RM) $(__EXECUTABLE_NAME)
 	$(RM) $(TARGET_STATIC_LIB)
 	$(RM) $(TARGET_DYNAMIC_LIB)
