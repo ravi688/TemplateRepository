@@ -188,6 +188,10 @@ ifeq ($(NOOPT),1)
 	LINKER_FLAGS += -O0
 endif
 
+ifeq ($(WALL),1)
+	COMPILER_FLAGS += -Wall
+endif
+
 DEBUG_COMPILER_FLAGS= -g #-fsanitize=integer-divide-by-zero // why it is not working on windows 64 bit?
 RELEASE_COMPILER_FLAGS= -O3 
 DEBUG_LINKER_FLAGS= -g #-fsanitize=integer-divide-by-zero  // why it is not working on windows 64 bit?
