@@ -62,16 +62,35 @@ endif
 all: dgraph release
 
 %.gv:
-	echo digraph $(PROJECT_NAME) { $(PROJECT_NAME); } > $@
+	echo digraph $(PROJECT_NAME) "{ $(PROJECT_NAME); }" > $@
 	@echo [Log] $@ created successfully!
 
 $(DEPENDENCIES_DIR) $(SHARED_DEPENDENCIES_DIR):
 	mkdir $(subst /,\,$@)
 	@echo [Log] $@ created successfully!
 
-
 init: $(PROJECT_NAME).gv $(DEPENDENCIES_DIR) $(SHARED_DEPENDENCIES_DIR)
 	@echo [Log] $(PROJECT_NAME) init successfully!
+	$(MAKE) --directory=./dependencies/Common init
+	$(MAKE) --directory=./dependencies/Common/dependencies/BufferLib init
+	$(MAKE) --directory=./dependencies/Common/dependencies/BufferLib/dependencies/CallTrace init
+
+setup:
+	git submodule update --init
+	git -C ./dependencies/Common checkout main
+	git -C ./dependencies/Common submodule update --init dependencies/BufferLib
+	git -C ./dependencies/Common/dependencies/BufferLib checkout main
+	git -C ./dependencies/Common/dependencies/BufferLib submodule update --init dependencies/CallTrace
+	git -C ./dependencies/Common/dependencies/BufferLib/dependencies/CallTrace checkout main
+	@echo [Log] Setup successfully!
+
+update:
+	git -C ./dependencies/Common pull origin main
+	git -C ./dependencies/Common/dependencies/BufferLib pull origin main
+	git -C ./dependencies/Common/dependencies/BufferLib/dependencies/CallTrace pull origin main
+	git -C ./dependencies/Common push
+	git -C ./dependencies/Common/dependencies/BufferLib push
+	git -C ./dependencies/Common/dependencies/BufferLib/dependencies/CallTrace push
 #-------------------------------------------
 
 
