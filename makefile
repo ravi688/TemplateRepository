@@ -71,9 +71,7 @@ $(DEPENDENCIES_DIR) $(SHARED_DEPENDENCIES_DIR):
 
 init: $(PROJECT_NAME).gv $(DEPENDENCIES_DIR) $(SHARED_DEPENDENCIES_DIR)
 	@echo [Log] $(PROJECT_NAME) init successfully!
-	$(MAKE) --directory=./dependencies/Common init
-	$(MAKE) --directory=./dependencies/Common/dependencies/BufferLib init
-	$(MAKE) --directory=./dependencies/Common/dependencies/BufferLib/dependencies/CallTrace init
+	$(foreach var, $(__DEPENDENCIES), $(MAKE) --directory=$(var) init;)
 
 setup:
 	git submodule update --init
@@ -331,7 +329,8 @@ bin-clean:
 	$(RM) $(TARGET_DYNAMIC_IMPORT_LIB)
 	$(RM_DIR) $(TARGET_LIB_DIR)
 	@echo [Log] Binaries cleaned successfully!
-	$(MAKE) --directory=./dependencies/Common clean
+	$(foreach var, $(__DEPENDENCIES), $(MAKE) --directory=$(var) clean;)
+# 	$(MAKE) --directory=./dependencies/Common clean
 # 	$(MAKE) --directory=./shared-dependencies/CallTrace clean
 # 	$(MAKE) --directory=./dependencies/HPML clean
 # 	$(MAKE) --directory=../../shared-dependencies/HPML clean
