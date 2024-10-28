@@ -273,6 +273,8 @@ lib-dynamic-packed-debug: $(TARGET_DYNAMIC_PACKED_LIB)
 
 release: DEFINES += $(RELEASE_DEFINES) -DBUILD_EXECUTABLE
 release: __STATIC_LIB_COMMAND = lib-static-release
+release: COMPILER_FLAGS += $(RELEASE_COMPILER_FLAGS)
+release: LINKER_FLAGS += $(RELEASE_LINKER_FLAGS)
 release: $(TARGET)
 debug: DEFINES += $(DEBUG_DEFINES) -DBUILD_EXECUTABLE
 debug: __STATIC_LIB_COMMAND = lib-static-debug
