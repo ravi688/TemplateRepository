@@ -42,7 +42,7 @@ MAIN_SOURCES=source/main.cpp
 #The sources which needs to be included when building test executasble
 TEST_SOURCES=source/test.cpp
 EXTERNAL_INCLUDES =
-EXTERNAL_LIBRARIES =
+EXTERNAL_LIBRARIES = $(shell pkg-config catch2-with-main --libs)
 BUILD_DEFINES=
 
 DEPENDENCIES = Common
