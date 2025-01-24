@@ -1,6 +1,9 @@
 # TemplateRepository
 This repository contains template for a project in C amd C++ language
 
+> [!WARNING]
+> I've switched to [Build Master](https://github.com/ravi688/BuildMaster), this respository will eventually be archived soon.
+
 ## Installing catch2 in msys2
 ```
 pkg-config -S mingw-w64-x86_64-catch
